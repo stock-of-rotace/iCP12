@@ -45,7 +45,7 @@ void icp12 (char *device, char *cmd, char *receive, int reclen)
 {
 	int n;
 	int bytes = -1;
-
+	char *status = "unknown";
 	struct termios options;
 	//puts(cmd);
 	if(fd==-1) {
@@ -109,6 +109,10 @@ void icp12 (char *device, char *cmd, char *receive, int reclen)
 	if (bytes <= 0) {
 		fprintf (stderr, "Error reading from device, command: %s\n", cmd);
 	}
+	if (receive[0] == '#') {
+		status = "check OK";
+	}
+	printf("send: %s , recv: %-20s, status: %s \n" , cmd, receive, status);
 }
 
 #include "i2c.c"
@@ -126,7 +130,7 @@ int main (int argc, char **argv)
 	char port = 'A';
 
 	while (1) {
-		c = getopt (argc, argv, "hc:d:c:aio:m:p:vT");
+		c = getopt (argc, argv, "hc:d:c:aio:m:p:vTu:");
 		if (c == -1)
 			break;
 
@@ -214,6 +218,10 @@ int main (int argc, char **argv)
 			printf("T%i=%.1f\n",ch,t);
 			break;
 		}
+		case 'u':
+			sprintf (cmd, "(%s)", optarg);
+			icp12 (device, cmd, recv, sizeof (recv));
+			break;
 		default:
 			showversion();
 		}
